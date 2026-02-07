@@ -28,16 +28,16 @@ func main() {
 
 	// Check for the positional argument (hash_input)
 	if len(flag.Args()) == 0 {
-		fmt.Println("Usage: go run procut.go or ./procut <HASH_OR_FILE> --alg <alg> --dict <dict> [--salt <salt>] [--output <file>]")
-		fmt.Println("Make sure you use '--' before any argument")
+		fmt.Println("Usage: go run procut.go or ./procut --alg <alg> --dict <dict> [--salt <salt>] [<hash or hash file>] [--output <file>]")
+		fmt.Println("\n-> Make sure you use '--' before any argument")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
 	hashInput := flag.Args()[0]
 
 	if *dictPtr == "" || *algPtr == "" {
-		fmt.Println("Usage: go run procut.go or ./procut <HASH_OR_FILE> --alg <alg> --dict <dict> [--salt <salt>] [--output <file>]")
-		fmt.Println("Make sure you use '--' before any argument")
+		fmt.Println("Usage: go run procut.go or ./procut --alg <alg> --dict <dict> [--salt <salt>] [<hash or hash_file>] [--output <file>]")
+		fmt.Println("\n-> Make sure you use '--' before any argument")
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
@@ -47,7 +47,7 @@ func main() {
 	if err == nil && !fileInfo.IsDir() { // It's a file
 		file, err := os.Open(hashInput)
 		if err != nil {
-			fmt.Printf("Error opening hash file '%s': %v\n", hashInput, err)
+			fmt.Printf("-> Error opening hash file '%s': %v\n", hashInput, err)
 			os.Exit(1)
 		}
 		defer file.Close()
@@ -59,7 +59,7 @@ func main() {
 			}
 		}
 		if len(hashesToCrack) == 0 {
-			fmt.Printf("Error: Hash file '%s' is empty or contains no valid hashes.\n", hashInput)
+			fmt.Printf("-> Error: Hash file '%s' is empty or contains no valid hashes.\n", hashInput)
 			os.Exit(1)
 		}
 	} else { // It's a hash string
@@ -74,13 +74,13 @@ func main() {
 
 	createHasher, ok := hashFuncFactory[*algPtr]
 	if !ok {
-		fmt.Printf("Unsupported hash algorithm '%s'. Supported: md5, sha1, sha256, sha512.\n", *algPtr)
+		fmt.Printf("-> Unsupported hash algorithm '%s'. \n-> Supported: md5, sha1, sha256, sha512.\n", *algPtr)
 		os.Exit(1)
 	}
 
 	dictFile, err := os.Open(*dictPtr)
 	if err != nil {
-		fmt.Printf("Error opening dictionary file '%s': %v\n", *dictPtr, err)
+		fmt.Printf("-> Error opening dictionary file '%s': %v\n", *dictPtr, err)
 		os.Exit(1)
 	}
 	defer dictFile.Close()
@@ -100,7 +100,7 @@ func main() {
 	var foundMu sync.Mutex
 
 	for _, targetHash := range hashesToCrack {
-		fmt.Printf("\nCracking hash: %s\n", targetHash)
+		fmt.Printf("\n\nCracking hash: %s\n\n", targetHash)
 
 		passwordsChan := make(chan string, *threadsPtr)
 		var wg sync.WaitGroup
@@ -128,7 +128,7 @@ func main() {
 				if hashed == targetHash {
 					hashFoundOnce.Do(func() {
 						foundForCurrentHash = true
-						fmt.Printf("\n> Password found: %s for hash %s\n", password, targetHash)
+						fmt.Printf("\n\n> Password found: %s \n-> For hash %s\n", password, targetHash)
 						foundMu.Lock()
 						foundPasswords[targetHash] = password
 						foundMu.Unlock()
